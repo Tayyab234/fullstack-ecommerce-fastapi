@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pymongo import MongoClient
@@ -20,6 +21,7 @@ app.add_middleware(
 client = MongoClient("mongodb://localhost:27017/")
 db = client["ecommerce"]
 products_collection = db["products"]
+cart_collection = db["cart"]
 
 # ---------------- Streaming Generator ----------------
 def stream_products():
@@ -54,3 +56,106 @@ def get_products():
     for p in products:
         p["_id"] = str(p["_id"])
     return products
+
+class CartItem(BaseModel):
+    productId: str
+    quantity: int
+    productName: str
+    productPriceCents: int
+    image: str
+    option: int
+
+
+# =========================
+# Cart Endpoint
+# =========================
+
+@app.post("/cart")
+def add_to_cart(item: CartItem):
+
+    cart_collection.update_one(
+        {"productId": item.productId},
+        {
+            "$inc": {
+                "quantity": item.quantity
+            },
+            "$set": {
+                "productName": item.productName,
+                "productPriceCents": item.productPriceCents,
+                "image": item.image,
+                "option": item.option
+            }
+        },
+        upsert=True
+    )
+
+    return {
+        "message": "Cart updated successfully"
+    }
+
+@app.get("/cart")
+def get_cart():
+
+    cart_items = list(cart_collection.find())
+
+    items_total_cents = 0
+    shipping_cents = 0
+
+    for item in cart_items:
+        item["_id"] = str(item["_id"])
+
+        # item total
+        item_total = item["productPriceCents"] * item["quantity"]
+        items_total_cents += item_total
+
+        # shipping logic (per item OR per cart rule depending on your design)
+        option = item.get("option", 1)
+
+        if option == 1:
+            shipping_cents += 0
+        elif option == 2:
+            shipping_cents += 499
+        elif option == 3:
+            shipping_cents += 999
+
+    # subtotal before tax
+    subtotal_cents = items_total_cents + shipping_cents
+
+    # tax 10%
+    tax_cents = int(subtotal_cents * 0.10)
+
+    # final total
+    total_cents = subtotal_cents + tax_cents
+
+    return {
+        "items": cart_items,
+
+        "itemsTotal": items_total_cents / 100,
+        "shipping": shipping_cents / 100,
+        "subtotal": subtotal_cents / 100,
+        "tax": tax_cents / 100,
+        "total": total_cents / 100
+    }
+@app.get("/cart/count")
+def get_cart_count():
+
+    cart_items = list(cart_collection.find())
+
+    total_items = 0
+
+    for item in cart_items:
+        total_items += item.get("quantity", 0)
+
+    return {
+        "count": total_items
+    }
+
+@app.get("/cart/items")
+def get_cart_items():
+
+    cart_items = list(cart_collection.find())
+
+    for item in cart_items:
+        item["_id"] = str(item["_id"])
+
+    return cart_items

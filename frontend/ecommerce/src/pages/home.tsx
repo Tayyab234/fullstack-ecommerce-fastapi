@@ -1,6 +1,8 @@
 import './home.css'
 import { Header } from '../components/header';
+import img1 from '../assets/images/icons/checkmark.png';
 import { useEffect, useState } from "react";
+import axios from 'axios';
 interface Product {
   _id: string;
   image:string;
@@ -13,6 +15,40 @@ interface Product {
 }
 export  function Home() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [addedProduct, setAddedProduct] = useState<string | null>(null);
+    const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+    const [cartQuantity, setCartQuantity] = useState(0);
+    useEffect(() => {
+      axios.get("/api/cart/count")
+        .then(response=>{
+          return  response.data;
+        }).then(data=>{
+          setCartQuantity(data.count);
+        });
+    },[addedProduct]);
+    const handleQuantityChange = (productId: string, value: number) => {
+      setQuantities((prev) => ({
+        ...prev,
+        [productId]: value
+      }));
+    };
+    async function addtocart(productId:string,index:number){
+        setAddedProduct(productId);
+        setTimeout(() => {
+          setAddedProduct(null);
+        }, 2000);
+        const product=products[index];
+        const reponse= await axios.post("/api/cart", {   
+          productId,
+          quantity: quantities[productId] || 1,
+          productName: product.name,
+          productPriceCents: product.priceCents,
+          image: product.image,
+          option:1
+        });
+        const data=await reponse.data;
+        console.log(data)
+    }
     useEffect(() => {
       fetch("/api/products")
         .then(res => res.json())
@@ -66,12 +102,12 @@ export  function Home() {
                         
     return(
   <>
-    <Header />
+    <Header cartQuantity={cartQuantity} />
     <div className="home-page">
         <div className="products-grid">
           {
 
-            products.map((product) => (
+            products.map((product,index) => (
             <div className="product-container" key={product._id}>
                  <div className="product-image-container">
                      <img className="product-image" src={`../../public/${product.image}`} />
@@ -91,7 +127,11 @@ export  function Home() {
                    ${(product.priceCents/100).toFixed(2)}
                  </div>
                  <div className="product-quantity-container">
-                   <select>
+                   <select
+                    value={quantities[product._id] || 1}
+                    onChange={(e) =>
+                      handleQuantityChange(product._id, Number(e.target.value))
+                    }>
                      <option value="1">1</option>
                      <option value="2">2</option>
                      <option value="3">3</option>
@@ -105,11 +145,13 @@ export  function Home() {
                    </select>
                  </div>
                  <div className="product-spacer"></div>
-                 <div className="added-to-cart">
-                   <img src="images/icons/checkmark.png" />
+                 <div className={`added-to-cart`}   style={{
+                     opacity: addedProduct === product._id ? 1 : 0
+                     }}>
+                   <img src={img1} />
                    Added
                  </div>
-                 <button className="add-to-cart-button button-primary">
+                 <button className="add-to-cart-button button-primary" onClick={() => addtocart(product._id,index)}>
                    Add to Cart
                  </button>
             </div>

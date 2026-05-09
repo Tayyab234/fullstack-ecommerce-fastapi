@@ -3,7 +3,8 @@ import mobilelogoimg from '../assets/images/mobile-logo-white.png'
 import serachicon from '../assets/images/icons/search-icon.png'
 import carticon from '../assets/images/icons/cart-icon.png'
 import { Link } from "react-router";
-export function Header(){
+export function Header({cartQuantity}: {cartQuantity: number}) {
+    
     return (
     <div className="header">
         <div className="left-section">
@@ -26,7 +27,7 @@ export function Header(){
           </Link>
           <Link className="cart-link header-link" to="/checkout">
             <img className="cart-icon" src={carticon} />
-            <div className="cart-quantity">3</div>
+            <div className="cart-quantity">{cartQuantity}</div>
             <div className="cart-text">Cart</div>
           </Link>
         </div>
