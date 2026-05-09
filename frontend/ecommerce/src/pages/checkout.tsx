@@ -1,9 +1,10 @@
 import "./checkout.css";
 import { CheckoutHeader } from "../components/checkout/header";
-export function Checkout() {
+export function Checkout({ cartQuantity}: {cartQuantity: number}) {
+  
   return (
     <>
-      <CheckoutHeader />
+      <CheckoutHeader cartQuantity={cartQuantity} />
       <div className="checkout-page">
         <div className="page-title">Review your order</div>
         <div className="checkout-grid">

@@ -1,10 +1,10 @@
 import "./order.css";
 import {Header} from "../components/header";
 import { Link } from "react-router";
-export function Order() {
+export function Order({cartQuantity}: {cartQuantity: number}) {
     return(
     <>
-        <Header />
+        <Header cartQuantity={cartQuantity} />
         <div className="orders-page">
           <div className="page-title">Your Orders</div>
           <div className="orders-grid">

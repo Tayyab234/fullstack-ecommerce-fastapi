@@ -13,19 +13,10 @@ interface Product {
   };
    priceCents: number;
 }
-export  function Home() {
+export  function Home({addedProduct, setAddedProduct, cartQuantity}: {addedProduct: string | null, setAddedProduct: (productId: string | null) => void, cartQuantity: number}) {
     const [products, setProducts] = useState<Product[]>([]);
-    const [addedProduct, setAddedProduct] = useState<string | null>(null);
     const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
-    const [cartQuantity, setCartQuantity] = useState(0);
-    useEffect(() => {
-      axios.get("/api/cart/count")
-        .then(response=>{
-          return  response.data;
-        }).then(data=>{
-          setCartQuantity(data.count);
-        });
-    },[addedProduct]);
+    
     const handleQuantityChange = (productId: string, value: number) => {
       setQuantities((prev) => ({
         ...prev,
@@ -38,7 +29,7 @@ export  function Home() {
           setAddedProduct(null);
         }, 2000);
         const product=products[index];
-        const reponse= await axios.post("/api/cart", {   
+        await axios.post("/api/cart", {   
           productId,
           quantity: quantities[productId] || 1,
           productName: product.name,
@@ -46,8 +37,6 @@ export  function Home() {
           image: product.image,
           option:1
         });
-        const data=await reponse.data;
-        console.log(data)
     }
     useEffect(() => {
       fetch("/api/products")
