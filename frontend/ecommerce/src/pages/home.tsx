@@ -1,8 +1,18 @@
 import './home.css'
 import { Header } from '../components/header';
 import { useEffect, useState } from "react";
+interface Product {
+  _id: string;
+  image:string;
+  name: string;
+  rating: {
+    stars: number;
+    count: number;
+  };
+   priceCents: number;
+}
 export  function Home() {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState<Product[]>([]);
     useEffect(() => {
       fetch("/api/products")
         .then(res => res.json())
@@ -62,7 +72,7 @@ export  function Home() {
           {
 
             products.map((product) => (
-            <div className="product-container" key={product.id}>
+            <div className="product-container" key={product._id}>
                  <div className="product-image-container">
                      <img className="product-image" src={`../../public/${product.image}`} />
                  </div>

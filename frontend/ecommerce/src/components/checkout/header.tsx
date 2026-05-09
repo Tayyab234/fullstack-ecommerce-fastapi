@@ -5,19 +5,19 @@ import carticon from '../../assets/images/logo.png'
 import { Link } from "react-router";
 export function CheckoutHeader() {
       return (
-    <div class="checkout-header">
-     <div class="header-content">
-       <div class="checkout-header-left-section">
+    <div className="checkout-header">
+     <div className="header-content">
+       <div className="checkout-header-left-section">
          <Link to="/">
-           <img class="logo" src={carticon} />
-           <img class="mobile-logo" src={mobilelogoimg} />
+           <img className="logo" src={carticon} />
+           <img className="mobile-logo" src={mobilelogoimg} />
          </Link>
        </div>
-       <div class="checkout-header-middle-section">
-         Checkout (<Link class="return-to-home-link"
+       <div className="checkout-header-middle-section">
+         Checkout (<Link className="return-to-home-link"
            to="/">3 items</Link>)
        </div>
-       <div class="checkout-header-right-section">
+       <div className="checkout-header-right-section">
          <img src={serachicon} />
        </div>
      </div>
