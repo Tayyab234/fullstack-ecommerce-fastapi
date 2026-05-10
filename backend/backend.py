@@ -1,6 +1,6 @@
-from fastapi import FastAPI,HTTPException
+from fastapi import FastAPI,HTTPException,APIRouter
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pymongo import MongoClient
@@ -23,6 +23,7 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["ecommerce"]
 products_collection = db["products"]
 cart_collection = db["cart"]
+orders_collection = db["orders"]  # optional but recommended
 
 # ---------------- Streaming Generator ----------------
 def stream_products():
@@ -161,7 +162,6 @@ def get_cart_items():
 
 
 
-
 class UpdateCartItem(BaseModel):
     productId: str
     quantity: Optional[int] = None
@@ -206,4 +206,66 @@ def delete_cart_item(productId: str):
 
     return {
         "message": "Item deleted successfully"
+    }
+
+class OrderProduct(BaseModel):
+    productId: str
+    productImage: str
+    productName: str 
+    productPriceCents: int
+    productDelivery: str
+    productQuantity: int
+
+
+class PlaceOrderRequest(BaseModel):
+    date: str
+    totalPriceCents: int
+    products: List[OrderProduct]
+
+
+
+@app.post("/placeorder")
+def place_order(order: PlaceOrderRequest):
+
+    # 1. Build order document
+    order_data = {
+        "date": order.date,
+        "totalPriceCents": order.totalPriceCents,
+        "products": [product.dict() for product in order.products]
+    }
+
+    # 2. Save order (recommended for real apps)
+    inserted_order = orders_collection.insert_one(order_data)
+
+    # 3. Clear cart after placing order
+    delete_result = cart_collection.delete_many({})
+
+    # 4. Safety check (optional)
+    if inserted_order.inserted_id is None:
+        raise HTTPException(status_code=500, detail="Order could not be created")
+
+    return {
+        "message": "Order placed successfully",
+        "orderId": str(inserted_order.inserted_id),
+        "cartClearedCount": delete_result.deleted_count
+    }
+
+
+@app.get("/orders")
+def get_last_orders():
+
+    orders = orders_collection.find().sort("_id", -1).limit(10)
+
+    result = []
+
+    for order in orders:
+        result.append({
+            "id": str(order["_id"]),
+            "date": order["date"],
+            "totalPriceCents": order["totalPriceCents"],
+            "products": order["products"]
+        })
+
+    return {
+        "orders": result
     }

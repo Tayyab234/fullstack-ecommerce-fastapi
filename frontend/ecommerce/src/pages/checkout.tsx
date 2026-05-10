@@ -158,7 +158,7 @@ export function Checkout({ cartQuantity, setCartQuantity }: { cartQuantity: numb
             }
           </div>
           
-          {cartPrice && <PaymentSummary cartPrice={cartPrice} />}
+          {cartPrice && <PaymentSummary cartPrice={cartPrice}  setCartQuantity={setCartQuantity} cartItems={cartItems} setCartItems={setCartItems} setUpdateFlag={setUpdateFlag}/>}
 
         </div>
       </div>

@@ -23,8 +23,8 @@ function App() {
     <Routes>
       <Route path='/' element={<Home addedProduct={addedProduct} setAddedProduct={setAddedProduct} cartQuantity={cartQuantity} />} />
       <Route path='/checkout' element={<Checkout cartQuantity={cartQuantity} setCartQuantity={setCartQuantity} />} />
-      <Route path='/order' element={<Order cartQuantity={cartQuantity} />} />
-      <Route path='/track' element={<Track/>} />
+      <Route path='/order' element={<Order cartQuantity={cartQuantity} setCartQuantity={setCartQuantity}  />} />
+      <Route path='/track' element={<Track cartQuantity={cartQuantity}/>} />
     </Routes>
 
   );

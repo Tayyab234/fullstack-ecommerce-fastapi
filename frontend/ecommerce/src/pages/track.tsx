@@ -1,10 +1,18 @@
 import "./track.css"
+import type { OrderProduct } from "./order";
+import { useLocation } from "react-router-dom";
 import { Header } from "../components/header";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { Link } from "react-router";
-export function Track(){
-    return(
+
+dayjs.extend(customParseFormat);
+export function Track({cartQuantity}: {cartQuantity: number}) {
+  const location = useLocation();
+  const trackingInfo = location.state?.product as OrderProduct | undefined;
+  return(
      <>
-        <Header/>
+        <Header cartQuantity={cartQuantity}/>
 
         <div className="tracking-page">
             <div className="order-tracking">
@@ -12,15 +20,15 @@ export function Track(){
                 View all orders
               </Link>
               <div className="delivery-date">
-                Arriving on Monday, June 13
+                Arriving on {dayjs(trackingInfo?.productDelivery, "MMMM D").format('dddd')}, {trackingInfo ? trackingInfo.productDelivery : "Loading..."}
               </div>
               <div className="product-info">
-                Black and Gray Athletic Cotton Socks - 6 Pairs
+                {trackingInfo?.productName}
               </div>
               <div className="product-info">
-                Quantity: 1
+                Quantity: {trackingInfo?.productQuantity}
               </div>
-              <img className="product-image" src="images/products/athletic-cotton-socks-6-pairs.jpg" />
+              <img className="product-image" src={`../../public/${trackingInfo?.productImage}`} />
               <div className="progress-labels-container">
                 <div className="progress-label">
                   Preparing
