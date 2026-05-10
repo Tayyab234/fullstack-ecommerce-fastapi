@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
+from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pymongo import MongoClient
@@ -128,7 +129,7 @@ def get_cart():
     total_cents = subtotal_cents + tax_cents
 
     return {
-        "items": cart_items,
+        "items": len(cart_items),
 
         "itemsTotal": items_total_cents / 100,
         "shipping": shipping_cents / 100,
@@ -153,9 +154,56 @@ def get_cart_count():
 @app.get("/cart/items")
 def get_cart_items():
 
-    cart_items = list(cart_collection.find())
-
-    for item in cart_items:
-        item["_id"] = str(item["_id"])
+    cart_items = list(cart_collection.find({}, {"_id": 0}))
 
     return cart_items
+
+
+
+
+
+class UpdateCartItem(BaseModel):
+    productId: str
+    quantity: Optional[int] = None
+    option: Optional[int] = None
+
+
+@app.put("/cart")
+def update_cart(item: UpdateCartItem):
+
+    update_fields = {}
+
+    # update quantity if provided
+    if item.quantity is not None:
+        update_fields["quantity"] = item.quantity
+
+    # update option if provided
+    if item.option is not None:
+        update_fields["option"] = item.option
+
+    # update database
+    cart_collection.update_one(
+        {"productId": item.productId},
+        {
+            "$set": update_fields
+        }
+    )
+
+    return {
+        "message": "Cart updated successfully"
+    }
+
+
+@app.delete("/cart/{productId}")
+def delete_cart_item(productId: str):
+
+    result = cart_collection.delete_one(
+        {"productId": productId}
+    )
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return {
+        "message": "Item deleted successfully"
+    }

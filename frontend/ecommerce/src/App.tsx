@@ -17,12 +17,12 @@ function App() {
         }).then(data=>{
           setCartQuantity(data.count);
         });
-    },[addedProduct]);
+    },[addedProduct,cartQuantity]);
 
   return (
     <Routes>
       <Route path='/' element={<Home addedProduct={addedProduct} setAddedProduct={setAddedProduct} cartQuantity={cartQuantity} />} />
-      <Route path='/checkout' element={<Checkout cartQuantity={cartQuantity} />} />
+      <Route path='/checkout' element={<Checkout cartQuantity={cartQuantity} setCartQuantity={setCartQuantity} />} />
       <Route path='/order' element={<Order cartQuantity={cartQuantity} />} />
       <Route path='/track' element={<Track/>} />
     </Routes>

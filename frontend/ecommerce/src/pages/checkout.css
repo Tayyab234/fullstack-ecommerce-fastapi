@@ -12,6 +12,13 @@
     margin-right: auto;
 }
 
+.inp1 {
+    width: 45px;
+    font-size: 17px;
+    padding: 0%;
+    margin-right: 3px;
+}
+
 .checkout-page .page-title {
     font-weight: 700;
     font-size: 22px;
