@@ -44,6 +44,8 @@ export  function Order({cartQuantity, setCartQuantity,}: {cartQuantity: number; 
 
     return(
      <>
+
+        
         <Header cartQuantity={cartQuantity} />
         <div className="orders-page">
           <div className="page-title">Your Orders</div>
@@ -87,7 +89,8 @@ export  function Order({cartQuantity, setCartQuantity,}: {cartQuantity: number; 
                       </button>
                     </div>
                     <div className="product-actions">
-                      <Link to="/track" state={{ product }} >
+                      
+                      <Link to="/track" state={{ product, date: order.date }}>
                         <button className="track-package-button button-secondary">
                           Track package
                         </button>

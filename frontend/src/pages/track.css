@@ -76,3 +76,17 @@
     border-radius: 50px;
     width: 50%;
 }
+
+.tracking-page .progress-bar-prepare {
+    height: 100%;
+    background-color: rgb(25, 135, 84);
+    border-radius: 50px;
+    width: 15%;
+}
+
+.tracking-page .progress-bar-completed {
+    height: 100%;
+    background-color: rgb(25, 135, 84);
+    border-radius: 50px;
+    width: 100%;
+}
